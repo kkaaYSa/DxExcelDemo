@@ -1,0 +1,38 @@
+﻿@using DevExpress.Web.Mvc
+@using System.Web.UI.WebControls
+
+@(
+    @Html.DevExpress().Spreadsheet(settings =>
+    {
+        settings.Name = "spreadsheet";
+        settings.CallbackRouteValues = new { Controller = "Home", Action = "SpreadsheetPartial" };
+
+        // Ribbon modunu harici (External) veya Ribbon yapıyoruz
+        settings.RibbonMode = SpreadsheetRibbonMode.Ribbon;
+
+        // Tüm sekmeleri temizle ve sadece ihtiyacımız olanı manuel ekle
+        settings.RibbonTabs.Clear();
+
+        // 1. "Dosya" Sekmesini Oluştur
+        var fileTab = settings.RibbonTabs.Add("Dosya");
+
+        // 2. Bir Grup Oluştur (Örn: Kayıt ve Yazdır Grubu)
+        var commonGroup = fileTab.Groups.Add("İşlemler");
+
+        // 3. Sadece istediğin komutları ekle
+        commonGroup.Items.Add(new SRFileSaveCommand());  // Kaydet
+        commonGroup.Items.Add(new SRFileSaveAsCommand());
+        commonGroup.Items.Add(new SRFilePrintCommand()); // Yazdır
+                                                         // Eğer farklı kaydet de istersen: commonGroup.Items.Add(new SRFileSaveAsCommand());
+
+        // --- Standart Ayarların ---
+        settings.Width = System.Web.UI.WebControls.Unit.Percentage(100);
+        settings.Height = System.Web.UI.WebControls.Unit.Pixel(600);
+        settings.WorkDirectory = "~/App_Data/WorkDirectory";
+
+        // ClientSideEvents'lerin burada kalabilir
+        settings.ClientSideEvents.PopupMenuShowing = "onSpreadsheetPopupMenuShowing";
+        settings.ClientSideEvents.CustomCommandExecuted = "onSpreadsheetCustomCommandExecuted";
+
+    }).Open(Server.MapPath("~/App_Data/WorkDirectory/DayBook.xlsx")).GetHtml()
+)
